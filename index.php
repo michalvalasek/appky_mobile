@@ -45,7 +45,9 @@
 		</div>
 		<div class="app-info">
 			<h3><%= title %></h3>
-			<p><%= company %></p>
+			<p><%= new Array(parseInt(stars) + 1).join("★") %><%= Array(5-parseInt(stars) + 1).join("☆") %></p>
+			<p><%= category_name %></p>
+			<p>By <%= company %></p>
 		</div>
 		<div class="clearfix"></div>
 	</script>

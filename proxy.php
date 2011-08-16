@@ -3,7 +3,7 @@
 $host = str_replace('index.php','',$_SERVER['HTTP_REFERER']);
 if (!in_array($host,array(
 	'http://appky-mobile.pagodabox.com/',
-))) die;
+))) die('Invalid host: '.$host);
 
 $method = $_GET['method'];
 
