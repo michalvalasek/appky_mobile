@@ -56,15 +56,12 @@
 	<script>
 	(function($){
 		
-		var API_BASE_URL = '<?=$_SERVER["APPKY_API_BASE_URL"]?>';
-		var API_KEY = '<?=$_SERVER["APPKY_API_KEY"]?>';
-		
 		App = Backbone.Model.extend({});
 		
 		AppCollection = Backbone.Collection.extend({
 			model: App,
 			page_size: 3,
-			url: API_BASE_URL+'api/getLatestApplications/?key='+API_KEY,
+			url: 'proxy.php?method=getLatestApplications',
 			parse: function(response) {
 				return response.applications;
 			},
