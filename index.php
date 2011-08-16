@@ -36,7 +36,7 @@
 	</section>
 	
 	<footer>
-		<p>By Michal Valasek for appky.sk</p>
+		<p>By <a href="http://michalvalasek.com" title="Homepage">Michal Valášek</a> for appky.sk</p>
 	</footer>
 	
 	<script type="text/template" id="template_defaultAppView">
