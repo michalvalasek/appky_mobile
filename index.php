@@ -56,6 +56,7 @@
 	<script>
 	(function($){
 		
+		var API_BASE_URL = '<?=$_SERVER["APPKY_API_BASE_URL"]?>';
 		var API_KEY = '<?=$_SERVER["APPKY_API_KEY"]?>';
 		
 		App = Backbone.Model.extend({});
@@ -63,8 +64,7 @@
 		AppCollection = Backbone.Collection.extend({
 			model: App,
 			page_size: 3,
-			url: 'http://192.168.1.13/appky_yii/api/getLatestApplications/?key='+API_KEY,
-			//url: 'http://localhost/appky_yii/api/getLatestApplications/?key='+API_KEY,
+			url: API_BASE_URL+'api/getLatestApplications/?key='+API_KEY,
 			parse: function(response) {
 				return response.applications;
 			},
