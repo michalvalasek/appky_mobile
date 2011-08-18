@@ -1,8 +1,12 @@
 <?php
 
+$_SERVER['APPKY_API_KEY'] = '424c4dedc1f3bed1e5e920d037eab70a';
+
 $host = str_replace('index.php','',$_SERVER['HTTP_REFERER']);
 if (!in_array($host,array(
 	'http://appky-mobile.pagodabox.com/',
+	'http://localhost/appky_mobile/',
+	'http://192.168.1.13/appky_mobile/',
 ))) die('Invalid host: '.$host);
 
 $method = $_GET['method'];

@@ -30,31 +30,36 @@
 		<h1>Appky.sk Mobile</h1>
 	</header>
 	
+	<div id="test"></div>
+	
 	<section id="main-content">
-		<div id="applications"></div>
-		<button class="load-more">Load more</button>
 	</section>
 	
 	<footer>
 		<p>By <a href="http://michalvalasek.com" title="Homepage">Michal Valášek</a> for appky.sk</p>
 	</footer>
 	
-	<script type="text/template" id="template_defaultAppView">
-		<div class="app-image">
-			<img src="<%= pic_url %>" width="100" />
-		</div>
-		<div class="app-info">
-			<h3><%= title %></h3>
-			<p><%= new Array(parseInt(stars) + 1).join("★") %><%= Array(5-parseInt(stars) + 1).join("☆") %></p>
-			<p><%= category_name %></p>
-			<p>By <%= company %></p>
-		</div>
-		<div class="clearfix"></div>
+	<script type="text/template" id="template_AppListView">
+		<div id="app-list"></div>
+		<button class="load-more">Load more</button>
 	</script>
 	
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
-	<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.4/underscore-min.js"></script>
-	<script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
+	<script type="text/template" id="template_AppListItemView">
+			<div class="app-image">
+				<img src="<%= pic_url %>" width="100" />
+			</div>
+			<div class="app-info">
+				<h3><%= title %></h3>
+				<p><%= new Array(parseInt(stars) + 1).join("★") %><%= Array(5-parseInt(stars) + 1).join("☆") %></p>
+				<p><%= category_name %></p>
+				<p>By <%= company %></p>
+			</div>
+			<div class="clearfix"></div>
+	</script>
+	
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.1.7/underscore-min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.1/backbone-min.js"></script>
 	<script>
 	(function($){
 		
@@ -72,72 +77,94 @@
 				var tmp = this.url;
 				this.url = url + '&offset=' + this.length + '&limit=' + this.page_size;
 				var self = this;
-				Backbone.sync('read', this, function(resp) {
+				$.getJSON(this.url, function(resp) {
 					self.add(self.parse(resp));
+					self.trigger("refresh");
 				});
 				this.url = tmp;
 			}
 		});
 		
-		DefaultAppView = Backbone.View.extend({
-			tagName: 'div',
-			className: 'app-preview',
-			template: _.template($('#template_defaultAppView').html()),
-			events: {
-				'click': 'handleShowDetails'
-			},
-			render: function() {
-				$(this.el).html(this.template(this.model.toJSON()));
-				return this;
-			},
-			handleShowDetails: function() {
-				alert('App Details!');
-			}
-		});
-	    
-		AppkyAppView = Backbone.View.extend({
-			el: $('body'),
-			
-			initialize: function(options) {
-				var p = this;
-				options || (options = {});
-
-				this.collection = new AppCollection();
-
-				this.collection.bind('add', function(app){ p.addOne(app, this); });
-				this.collection.bind('refresh', function(){ p.addAll(this); });
-				this.collection.bind('all', function(){ p.render(this); });
-
+		var IndexView = Backbone.View.extend({
+			template: _.template($('#template_AppListView').html()),
+			initialize: function() {	
+				_.bindAll(this,"render","handleLoadMore");
 				this.collection.loadMore();
 			},
-			
 			events: {
-				'click .app-preview': 'handleShowDetails',
 				'click .load-more': 'handleLoadMore'
 			},
-			
-			addOne: function(app, collection) {
-				var view = new DefaultAppView({model: app});
-				var app_el = $(view.render().el);
-
-				$('#applications').append(app_el);
+			render: function(){
+				$(this.el).html(this.template());
+				var listView = new AppListView({collection: this.collection});
+				$('#app-list').html(listView.el);
 			},
-			
-			addAll: function(collection) {
-				var p = this;
-				collection.each(function(tweet) {
-					p.addOne(tweet, collection);
-				});
-			},
-			
-			render: function() {},
-			
 			handleLoadMore: function() {
 				this.collection.loadMore();
 			}
 		});
-	
-		appky = new AppkyAppView();
+				
+		var AppListView = Backbone.View.extend({
+			//template: _.template($('#template_AppListView').html()),
+			//tagName: 'div',
+			//id: 'app-list',
+			initialize: function() {
+				_.bindAll(this,"render");
+				this.collection.bind("refresh", this.render);
+			},
+			render: function() {
+				$(this.el).empty();
+				var els = [];
+				this.collection.each(function(model){
+					var view = new AppListItemView({model: model});
+					els.push(view.render().el);
+				});
+				$(this.el).append(els);
+				
+				return this;
+			}
+		});
+		
+		var AppListItemView = Backbone.View.extend({
+			tagName: 'div',
+			className: 'app-list-item',
+			template: _.template($('#template_AppListItemView').html()),
+			initialize: function() {
+				_.bindAll(this,"render","handleClick");
+			},
+			events: {
+				'click': 'handleClick'
+			},
+			render: function() {
+				$(this.el).html(this.template(this.model.toJSON()));
+				//$(this.el).html('<p>test</p>');
+				return this;
+			},
+			handleClick: function(){
+				alert('Show details: '+this.model.get('application_id'));
+			}
+		});
+		
+		var AppDetailsView = Backbone.View.extend({});
+		
+		var AppRouter = Backbone.Router.extend({
+			initialize: function(){
+				applications = new AppCollection;
+			},
+			routes: {
+	            "/application/view/:id": "applicationDetails",
+	            "": "index" // Backbone will try match the route above first
+	        },
+	        applicationDetails: function( id ) {
+				var detailsView = new AppDetailsView();
+			},
+	        index: function( actions ){
+				var indexView = new IndexView({collection: applications, el: '#main-content'});
+				indexView.render();
+	        }
+	    });
+		var app_router = new AppRouter;
+		Backbone.history.start();
 				
 	})(jQuery);
 	</script>

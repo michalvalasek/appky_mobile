@@ -227,8 +227,8 @@ header h1 {
 section#main-content {
 	padding: 0.5em;
 }
-#applications {}
-.app-preview {
+#app-list {}
+.app-list-item {
 	margin-bottom: 0.8em;
 	border-radius: 5px;
 	-moz-box-shadow: 0px 0px 5px #333;
@@ -237,20 +237,20 @@ section#main-content {
 	padding: 0.5em;
 	background: #eee;
 }
-.app-preview .app-image {
+.app-list-item .app-image {
 	width: 100px;
 	height: 100px;
 	float: left;
 	border-radius: 10px;
 	overflow: hidden;
 }
-.app-preview .app-info {
+.app-list-item .app-info {
 	width: 170px;
 	float: left;
 	margin-left: 1.4em;
 	margin-right: 0.5em;
 }
-.app-preview .app-info h3 {
+.app-list-item .app-info h3 {
 	font-size: 120%;
 }
 #main-content button.load-more {
