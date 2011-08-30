@@ -13,6 +13,16 @@
 	<meta name="MobileOptimized" content="320"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
+	<!-- Home screen icon  Mathias Bynens http://goo.gl/6nVq0 -->
+	<!-- For iPhone 4 with high-resolution Retina display: -->
+	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/h/apple-touch-icon.png">
+	<!-- For first-generation iPad: -->
+	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/m/apple-touch-icon.png">
+	<!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+	<link rel="apple-touch-icon-precomposed" href="img/l/apple-touch-icon-precomposed.png">
+	<!-- For nokia devices: -->
+	<link rel="shortcut icon" href="img/l/apple-touch-icon.png">
+	
 	<!--iOS web app, deletable if not needed -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -55,7 +65,7 @@
 				</div>
 			<%});%>
 		</div>
-		<button class="load-more wide">Load more</button>
+		<button class="load-more wide">Ďalšie</button>
 	</script>
 	
 	<script type="text/template" id="template_AppDetailsView">
