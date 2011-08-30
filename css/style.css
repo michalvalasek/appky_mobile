@@ -253,7 +253,47 @@ section#main-content {
 .app-list-item .app-info h3 {
 	font-size: 120%;
 }
-#main-content button.load-more {
+
+/* Applications Details View*/
+.app-details {
+	margin-bottom: 0.8em;
+	border-radius: 5px;
+	-moz-box-shadow: 0px 0px 5px #333;
+	-webkit-box-shadow: 0px 0px 5px #333;
+	box-shadow: 0px 0px 5px #333;
+	padding: 0.5em;
+	background: #eee;
+}
+.app-details .app-image {
+	width: 100px;
+	height: 100px;
+	float: left;
+	border-radius: 10px;
+	overflow: hidden;
+	margin-right: 1em;
+	margin-bottom: .8em;
+}
+
+.app-details h2 {
+	font-size: 150%;
+	margin-bottom: .5em;
+	text-shadow: white 1px 1px;
+}
+.app-description {
+	clear: both;
+	margin-top: .8em;
+	font-size: 85%;
+	background: #fafafa;
+	padding: .5em;
+	border-top: 1px solid #ddd;
+}
+.app-description p.app-description-label {
+	font-size: 110%;
+	font-weight: bold;
+	margin-bottom: .8em;
+}
+
+#main-content button.wide {
 	width: 100%;
 	height: 3em;
 	font-size: 120%;

@@ -26,44 +26,78 @@
 </head>
 <body>
 	
+	<!-- BASIC STURCTURE -->
 	<header>
 		<h1>Appky.sk Mobile</h1>
 	</header>
-	
-	<div id="test"></div>
-	
-	<section id="main-content">
-	</section>
-	
+	<section id="main-content"></section>
 	<footer>
 		<p>By <a href="http://michalvalasek.com" title="Homepage">Michal Valášek</a> for appky.sk</p>
 	</footer>
 	
-	<script type="text/template" id="template_AppListView">
-		<div id="app-list"></div>
-		<button class="load-more">Load more</button>
+	
+	<!-- TEMPLATES -->
+	
+	<script type="text/template" id="template_IndexView">
+		<div id="app-list">
+			<% _.each(apps, function(app) { %>
+				<div class="app-list-item" id="app-<%= app.application_id %>">
+					<div class="app-image">
+						<img src="<%= app.pic_url %>" width="100" />
+					</div>
+					<div class="app-info">
+						<h3><%= app.title %></h3>
+						<p><%= new Array(parseInt(app.stars) + 1).join("★") %><%= Array(5-parseInt(app.stars) + 1).join("☆") %></p>
+						<p><%= app.category_name %></p>
+						<p>By <%= app.company %></p>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+			<%});%>
+		</div>
+		<button class="load-more wide">Load more</button>
 	</script>
 	
-	<script type="text/template" id="template_AppListItemView">
+	<script type="text/template" id="template_AppDetailsView">
+		<div class="app-details">
 			<div class="app-image">
 				<img src="<%= pic_url %>" width="100" />
 			</div>
-			<div class="app-info">
-				<h3><%= title %></h3>
-				<p><%= new Array(parseInt(stars) + 1).join("★") %><%= Array(5-parseInt(stars) + 1).join("☆") %></p>
-				<p><%= category_name %></p>
-				<p>By <%= company %></p>
+			<h2><%= title %></h2>
+			<p><strong>Kategória:</strong> <%= category_name %></p>
+			<p><strong>Autor:</strong> <%= company %></p>
+			<p><strong>Hodnotenie používateľov:</strong> <%= new Array(parseInt(stars) + 1).join("★") %><%= Array(5-parseInt(stars) + 1).join("☆") %></p>
+			<div class="app-description">
+				<p class="app-description-label">Popis aplikácie:</p>
+				<%= description %>
 			</div>
-			<div class="clearfix"></div>
+		</div>
+		<button class="back wide">Späť</button>
 	</script>
 	
+	<!-- Javascripts -->
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.1.7/underscore-min.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.5.1/backbone-min.js"></script>
 	<script>
 	(function($){
 		
-		App = Backbone.Model.extend({});
+		/* Models and Collections */
+		
+		App = Backbone.Model.extend({
+			initialize: function(options) {
+				console.log('App:initialize');
+				if (options.application_id) {
+					this.loadById(options.application_id);
+				}
+			},
+			loadById: function(application_id) {
+				var self = this;
+				$.getJSON('proxy.php?method=getApplicationDetails&id='+application_id, function(resp) {
+					self.set(resp);
+				});
+			}
+		});
 		
 		AppCollection = Backbone.Collection.extend({
 			model: App,
@@ -77,91 +111,91 @@
 				var tmp = this.url;
 				this.url = url + '&offset=' + this.length + '&limit=' + this.page_size;
 				var self = this;
+				console.log('AppCollection:loadMore: original length = '+self.length);
 				$.getJSON(this.url, function(resp) {
 					self.add(self.parse(resp));
 					self.trigger("refresh");
+					console.log('AppCollection:loadMore: current length = '+self.length);
 				});
 				this.url = tmp;
+			},
+			refresh: function() {
+				console.log('AppCollection:refresh');
+				this.trigger("refresh");
+			}
+		});
+		
+
+
+		/* Views */
+		
+		var AppDetailsView = Backbone.View.extend({
+			template: _.template($('#template_AppDetailsView').html()),
+			initialize: function() {
+				_.bindAll(this,"render","handleBack");
+				this.model.bind("change", this.render);
+				//app_router.navigate("/a/"+app_id);
+			},
+			events: {
+				'click .back': 'handleBack'
+			},
+			render: function() {
+				$(this.el).html(this.template(this.model.toJSON()));
+				return this;
+			},
+			handleBack: function() {
+				history.go(-1);
+				//window.location = "#/";
 			}
 		});
 		
 		var IndexView = Backbone.View.extend({
-			template: _.template($('#template_AppListView').html()),
-			initialize: function() {	
-				_.bindAll(this,"render","handleLoadMore");
-				this.collection.loadMore();
-			},
-			events: {
-				'click .load-more': 'handleLoadMore'
-			},
-			render: function(){
-				$(this.el).html(this.template());
-				var listView = new AppListView({collection: this.collection});
-				$('#app-list').html(listView.el);
-			},
-			handleLoadMore: function() {
-				this.collection.loadMore();
-			}
-		});
-				
-		var AppListView = Backbone.View.extend({
-			//template: _.template($('#template_AppListView').html()),
-			//tagName: 'div',
-			//id: 'app-list',
+			template: _.template($('#template_IndexView').html()),
 			initialize: function() {
-				_.bindAll(this,"render");
+				_.bindAll(this,"render","handleMore","handleShow");
 				this.collection.bind("refresh", this.render);
 			},
-			render: function() {
-				$(this.el).empty();
-				var els = [];
-				this.collection.each(function(model){
-					var view = new AppListItemView({model: model});
-					els.push(view.render().el);
-				});
-				$(this.el).append(els);
-				
-				return this;
-			}
-		});
-		
-		var AppListItemView = Backbone.View.extend({
-			tagName: 'div',
-			className: 'app-list-item',
-			template: _.template($('#template_AppListItemView').html()),
-			initialize: function() {
-				_.bindAll(this,"render","handleClick");
-			},
 			events: {
-				'click': 'handleClick'
+				'click .load-more': 'handleMore',
+				'click .app-list-item': 'handleShow'
 			},
 			render: function() {
-				$(this.el).html(this.template(this.model.toJSON()));
-				//$(this.el).html('<p>test</p>');
+				$(this.el).html(this.template( {apps: this.collection.toJSON()} ));
 				return this;
 			},
-			handleClick: function(){
-				alert('Show details: '+this.model.get('application_id'));
+			handleMore: function() {
+				this.collection.loadMore();
+			},
+			handleShow: function(evt) {
+				var app_id = evt.currentTarget.id.substr(4);
+				window.location = "#/a/"+app_id;
 			}
 		});
 		
-		var AppDetailsView = Backbone.View.extend({});
+
+
+		/* Routers */
 		
 		var AppRouter = Backbone.Router.extend({
 			initialize: function(){
 				applications = new AppCollection;
+				index_view = new IndexView({collection: applications, el: '#main-content'});
+				
+				applications.loadMore(); // Load first page of apps
 			},
 			routes: {
-	            "/application/view/:id": "applicationDetails",
-	            "": "index" // Backbone will try match the route above first
+				"/a/:id": "applicationDetails",
+				"/": "index",
+				"": "index" // Backbone will try match the route above first
 	        },
 	        applicationDetails: function( id ) {
-				var detailsView = new AppDetailsView();
+				var app = new App({application_id:id});
+				var detailsView = new AppDetailsView({model: app, el: '#main-content'});
 			},
-	        index: function( actions ){
-				var indexView = new IndexView({collection: applications, el: '#main-content'});
-				indexView.render();
-	        }
+			index: function() {
+				//var view = new Index2View({collection: applications, el: '#main-content'});
+				index_view.render();
+			}
 	    });
 		var app_router = new AppRouter;
 		Backbone.history.start();

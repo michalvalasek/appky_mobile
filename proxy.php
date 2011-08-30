@@ -14,6 +14,7 @@ $method = $_GET['method'];
 $params['key'] = $_SERVER['APPKY_API_KEY'];
 if (!empty($_GET['offset'])) $params['offset'] = (int)$_GET['offset'];
 if (!empty($_GET['limit'])) $params['limit'] = (int)$_GET['limit'];
+if (!empty($_GET['id'])) $params['application_id'] = (int)$_GET['id'];
 
 // Set your return content type
 header('Content-type: application/xml');
